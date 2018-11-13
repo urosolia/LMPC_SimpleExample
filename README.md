@@ -1,3 +1,1 @@
-<p align="center">
-<img src="https://github.com/urosolia/RacingLMPC/blob/master/src/PDF_README.pdf" width="500" />
-</p>
+Please refer to the [PDF README](https://github.com/urosolia/LMPC_SimpleExample/blob/masterPDF_README.pdf)
