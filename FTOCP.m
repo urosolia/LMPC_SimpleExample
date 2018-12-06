@@ -32,7 +32,7 @@ for i = 1:N
                  Hu * u{i} <= bu;];
 end
 
-% Constraint the multiplies lambda to be positive
+% Constrain the Lambda multipliers
 for i = 1:length(Qfun)
     Constraints=[Constraints;
                  lambda(i) >= 0;];

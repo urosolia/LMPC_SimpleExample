@@ -21,7 +21,7 @@ set(h,'fontsize',15);
 %  ========================================================================
 %% Initialize Safe Set and Q-funtion
 SS   = x_cl;                          % Safe set vector: Vector collecting the state of the performed iterations
-Qfun = ComputeCost(x_cl, u_cl, Q, R); % Q-function vector: Vector collecting the cost-to-go of the store states
+Qfun = ComputeCost(x_cl, u_cl, Q, R); % Q-function vector: Vector collecting the cost-to-go of the stored states
 IterationCost = Qfun(1);
 %% Now run the LMPC
 % Pick number of iterations to run
