@@ -1,4 +1,4 @@
-function [A, B, U, X, Q, R, N] = DefineSystem()
+function [A, B, U, X, Q, R, N, W] = DefineSystem()
 % Set controller horizon
 N = 3;
 
@@ -24,4 +24,8 @@ U = Polyhedron([Val_U; -Val_U]);
 x_max = 15;
 v_max = 15;
 X = Polyhedron([x_max v_max; x_max -v_max; -x_max -v_max; -x_max v_max]);
+
+wBound = 0.1;
+W = Polyhedron([wBound wBound;wBound -wBound; -wBound wBound; -wBound -wBound]);
+
 end

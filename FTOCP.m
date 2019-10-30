@@ -1,4 +1,4 @@
-function [ x, u ] = FTOCP( x_t , N, Q, R, Qfun, SS, A, B, X, U, solver)
+function [ x, u, v ] = FTOCP( x_t , N, Q, R, Qfun, SS, A, B, X, U, solver, invariantSet, bar_x_stored, bar_u_stored)
 % FTOCP solves the Finite Time Optimal Control Problem
 % The function takes as inputs
 % - x_t: state of the system at time t
@@ -10,21 +10,35 @@ function [ x, u ] = FTOCP( x_t , N, Q, R, Qfun, SS, A, B, X, U, solver)
 % - X: polyhedron representng the state constraints
 % - U: polyhedron representng the input constraints
 % - Solver: solver to use for the FTOCP
+% - invariantSet: invariant set for the error dynamics
+% - bar_x_stored: bar_x at the previous time step
+% - bar_v_stored: nominal input at the previous time step
 
 % Define Yalmip Variables
 x=sdpvar(size(A,2)*ones(1,N+1),ones(1,N+1));
 u=sdpvar(size(B,2)*ones(1,N),ones(1,N));
+if isempty(bar_x_stored)
+    v = 0;
+else
+    v=sdpvar(1);
+end
 lambda = sdpvar(length(Qfun), 1); % Number of multipliers used for the convex hull
 
 % Select state and input constraints matrices from polyhedrons
 Hx  = X.A;  bx  = X.b;
 Hu  = U.A;  bu  = U.b;
+He  = invariantSet.A;  be  = invariantSet.b;
 
 % ======= Constraints Definition ======
 
 % Initial Condition
-Constraints = [x_t == x{1}];
-
+if isempty(bar_x_stored)
+    Constraints = [He*(x_t-x{1})<=be];
+else
+    Constraints = [He*(x_t-x{1})<=be
+                    x{1} == A*bar_x_stored + B*v;
+                    v'*R*v <= bar_u_stored'*R*bar_u_stored];
+end
 % System Dynamics
 for i = 1:N
     Constraints=[Constraints;
@@ -43,7 +57,7 @@ Constraints=[Constraints;
 % ======= Cost Definition ======
 % Running Cost
 Cost=0;
-for i=1:N        
+for i=1:N
     Cost = Cost + x{i}'*Q*x{i} + u{i}'*R*u{i};
 end 
 
@@ -56,6 +70,5 @@ options.OptimalityTolerance = 1e-15;
 options.StepTolerance = 1e-15;
 Problem = optimize(Constraints,Cost,options);
 Objective = double(Cost);
-
 end
 

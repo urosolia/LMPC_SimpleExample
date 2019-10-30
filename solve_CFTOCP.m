@@ -1,4 +1,4 @@
-function [ x_cl, u_cl ] = solve_CFTOCP( x_t , N, Q, R, A, B, X, U, solver)
+function [ x_cl, u_cl ] = solve_CFTOCP( x_t , N, Q, R, A, B, X, U, solver, E)
 % FTOCP solves the Finite Time Optimal Control Problem
 % The function takes as inputs
 % - x_t: state of the system at time t
@@ -9,6 +9,7 @@ function [ x_cl, u_cl ] = solve_CFTOCP( x_t , N, Q, R, A, B, X, U, solver)
 % - (A,B): matrices defining the system dynamics
 % - X: polyhedron representng the state constraints
 % - U: polyhedron representng the input constraints
+% - E: invariant set for the error dynamics
 
 % Define Yalmip Variables
 x=sdpvar(size(A,2)*ones(1,N+1),ones(1,N+1));
@@ -17,11 +18,12 @@ u=sdpvar(size(B,2)*ones(1,N),ones(1,N));
 % Select state and input constraints matrices from polyhedrons
 Hx  = X.A;  bx  = X.b;
 Hu  = U.A;  bu  = U.b;
+Hinv= E.A;  binv= E.b;
 
 % ======= Constraints Definition ======
 
 % Initial Condition
-Constraints = [x_t == x{1}];
+Constraints = [Hinv*(x_t - x{1}) <= binv];
 
 % System Dynamics
 for i = 1:N
