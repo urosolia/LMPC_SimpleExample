@@ -49,6 +49,7 @@ for i = 1:(Iterations+1)
     fprintf('Iteration cost at iteration %d:  %13.4f\n', [i, IterationCost{i}(1)]);
 end
 
+%%
 figure()
 hold on
 a = plot(SS(1,:), SS(2,:), 'or');
@@ -57,6 +58,15 @@ c = plot(x_opt(1,:), x_opt(2,:), '-k*');
 xlabel('$$x_1$$', 'interpreter', 'latex','fontsize',20);
 ylabel('$$x_2$$', 'interpreter', 'latex','fontsize',20);
 h = legend([a, b, c], 'Sampled Safe Set', 'LMPC closed-loop', 'Optimal Solution');
+set(h,'fontsize',15)
+
+figure()
+hold on
+for i = 1:(Iterations+1)
+    a = plot(u_cl{i}, '-ob');
+end
+b = plot(u_opt, '-*k');
+h = legend([a, b], 'Input', 'Optimal Input');
 set(h,'fontsize',15)
 
 fprintf('Optimal cost:  %13.4f\n', optCost(1));

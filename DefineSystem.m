@@ -1,6 +1,6 @@
 function [A, B, U, X, Q, R, N] = DefineSystem()
 % Set controller horizon
-N = 3;
+N = 6;
 
 % Set cost function
 Q = [1, 0;
@@ -16,7 +16,7 @@ B = [0;
      1]; 
 
 % Define the input constraint set U
-Val_U = 5.0;
+Val_U = 5;
 U = Polyhedron([Val_U; -Val_U]);
 
 % Define the Recovery input constraint set R

@@ -18,6 +18,8 @@ SS = x_cl{1};
 uSS = u_cl{1};
 Qfun= IterationCost{1};
 IterationCost_out{1} = IterationCost{1};
+x_cl_out{1} = x_cl{1};
+u_cl_out{1} = u_cl{1};
 
 while (j <= Iterations)
     SSQfun = Polyhedron([SS', Qfun']);

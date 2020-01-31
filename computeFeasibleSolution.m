@@ -8,7 +8,6 @@ solver = 'quadprog'; % Options are 'gurobi' or 'quadprog';
 [A, B, U, X, Q, R, N] = DefineSystem();
 
 %% Load the first feasible solution
-load('feasibleSolution')
 x_max = X.V(1,1);
 v_max = 0.1;
 X_feasible = Polyhedron([x_max v_max; x_max -v_max; -x_max -v_max; -x_max v_max]);
@@ -23,5 +22,5 @@ h = legend('First Feasible Solution','interpreter','latex');
 xlabel('$$x_1$$','interpreter','latex','fontsize',20);
 ylabel('$$x_2$$','interpreter','latex','fontsize',20);
 set(h,'fontsize',15);
-
+%%
 save('feasibleSolution.mat','x_feasible','u_feasible')

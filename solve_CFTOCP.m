@@ -41,7 +41,7 @@ end
 Cost = Cost + x{N+1}'*Q*x{N+1};
 
 % Solve the FTOCP
-options = sdpsettings('verbose',0,'solver',solver);
+options = sdpsettings('verbose',1,'solver',solver);
 Problem = optimize(Constraints,Cost,options);
 Objective = double(Cost);
 
