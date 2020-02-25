@@ -1,4 +1,4 @@
-function [ x, u ] = FTOCP( x_t , N, Q, R, Qfun, SS, A, B, X, U, solver)
+function [ x, u ] = FTOCP( x_t , N, Q, R, Qfun, SS, A, B, X, U, LMPC_options)
 % FTOCP solves the Finite Time Optimal Control Problem
 % The function takes as inputs
 % - x_t: state of the system at time t
@@ -43,17 +43,21 @@ Constraints=[Constraints;
 % ======= Cost Definition ======
 % Running Cost
 Cost=0;
-for i=1:N        
-    Cost = Cost + x{i}'*Q*x{i} + u{i}'*R*u{i};
+for i=1:N
+    if LMPC_options.norm == 1
+        Cost = Cost + norm(Q*x{i},1) + norm(R*u{i},1);
+    else
+        Cost = Cost + x{i}'*Q*x{i} + u{i}'*R*u{i};
+    end
 end 
 
 % Terminal cost as convex combination of stored cost-to-go
 Cost = Cost + Qfun*lambda;
 
 % Solve the FTOCP
-options = sdpsettings('verbose',0,'solver',solver);
-options.OptimalityTolerance = 1e-15;
-options.StepTolerance = 1e-15;
+options = sdpsettings('verbose',0,'solver',LMPC_options.solver);
+% options.OptimalityTolerance = 1e-15;
+% options.StepTolerance = 1e-15;
 Problem = optimize(Constraints,Cost,options);
 Objective = double(Cost);
 

@@ -1,4 +1,4 @@
-function [ x_cl, u_cl ] = solve_CFTOCP( x_t , N, Q, R, A, B, X, U, solver)
+function [ x_cl, u_cl ] = solve_CFTOCP( x_t , N, Q, R, A, B, X, U, LMPC_options)
 % FTOCP solves the Finite Time Optimal Control Problem
 % The function takes as inputs
 % - x_t: state of the system at time t
@@ -35,13 +35,20 @@ Constraints =[Constraints;
 % ======= Cost Definition ======
 % Running Cost
 Cost=0;
-for i=1:N        
-    Cost = Cost + x{i}'*Q*x{i} + u{i}'*R*u{i};
-end 
-Cost = Cost + x{N+1}'*Q*x{N+1};
+if LMPC_options.norm == 1
+    for i=1:N        
+        Cost = Cost + norm(Q*x{i},1) + norm(R*u{i},1);
+    end 
+    Cost = Cost + norm(Q*x{N+1},1);
+else
+    for i=1:N        
+        Cost = Cost + x{i}'*Q*x{i} + u{i}'*R*u{i};
+    end 
+    Cost = Cost + x{N+1}'*Q*x{N+1};
+end
 
 % Solve the FTOCP
-options = sdpsettings('verbose',1,'solver',solver);
+options = sdpsettings('verbose',1,'solver',LMPC_options.solver);
 Problem = optimize(Constraints,Cost,options);
 Objective = double(Cost);
 

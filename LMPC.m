@@ -44,7 +44,7 @@ while (j <= Iterations)
         
         % Solve the LMPC at time t of the j-th iteration
         [~, uPred ] = FTOCP(x_LMPC(:,t), N, Q, R, Qfun, SS,...
-                                                 A, B, X, U, LMPC_options.solver);
+                                                 A, B, X, U, LMPC_options);
         
         % Update system position
         u_LMPC(:,t) = double(uPred{1});
@@ -52,14 +52,14 @@ while (j <= Iterations)
 
         t = t + 1;
     end
-
+    
     % Now save the data, update cost and safe set.
     x_cl_out{j+1} = x_LMPC;
     u_cl_out{j+1} = u_LMPC;
-    IterationCost_out{j+1} = ComputeCost(x_LMPC, u_LMPC, Q, R);
+    IterationCost_out{j+1} = ComputeCost(x_LMPC, u_LMPC, Q, R, LMPC_options);
     
     SS   = [SS, x_LMPC];
-    Qfun = [Qfun, ComputeCost(x_LMPC, u_LMPC, Q, R)];
+    Qfun = [Qfun, ComputeCost(x_LMPC, u_LMPC, Q, R, LMPC_options)];
 
     % increase Iteration index and restart
     j = j + 1;

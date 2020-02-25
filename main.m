@@ -3,7 +3,8 @@ clear all
 close all
 
 %% Options
-LMPC_options.solver = 'quadprog'; % Options are 'gurobi' or 'quadprog'. IMPORTANT: Use gurobi for better precision;
+LMPC_options.solver = 'gurobi'; % Options are 'gurobi' or 'quadprog'. IMPORTANT: Use gurobi for better precision;
+LMPC_options.norm   = 2;        % Options 1-norm or 2-norm;
 
 %%
 % Define your system 
@@ -25,7 +26,7 @@ set(h,'fontsize',15);
 %% Initialize Safe Set and Q-funtion
 x_cl{1} = x_feasible;                          % Safe set vector: Vector collecting the state of the performed iterations
 u_cl{1} = u_feasible;                         % Safe Input set vector: Vector collecting the input of the performed iterations
-Qfun = ComputeCost(x_feasible, u_feasible, Q, R); % Q-function vector: Vector collecting the cost-to-go of the stored states
+Qfun = ComputeCost(x_feasible, u_feasible, Q, R, LMPC_options); % Q-function vector: Vector collecting the cost-to-go of the stored states
 IterationCost{1} = Qfun;
 %% Now run the LMPC
 % Pick number of iterations to run
@@ -37,8 +38,8 @@ x0 = x_cl{1}(:,1);
                                                         N, Iterations, X, U, LMPC_options);
 
 %% Compute Optimal Solution
-[ x_opt, u_opt ] = solve_CFTOCP( x0, 300, Q, R, A, B, X, U, LMPC_options.solver);
-optCost = ComputeCost(x_opt, u_opt, Q, R); % Q-function vector: Vector collecting the cost-to-go of the store states
+[ x_opt, u_opt ] = solve_CFTOCP( x0, 300, Q, R, A, B, X, U, LMPC_options);
+optCost = ComputeCost(x_opt, u_opt, Q, R, LMPC_options); % Q-function vector: Vector collecting the cost-to-go of the store states
 
 %% Display Cost and Plot the Results
 format long
@@ -60,9 +61,20 @@ ylabel('$$x_2$$', 'interpreter', 'latex','fontsize',20);
 h = legend([a, b, c], 'Sampled Safe Set', 'LMPC closed-loop', 'Optimal Solution');
 set(h,'fontsize',15)
 
+%%
+itCost = [];
+for i = 1:(Iterations+1)
+    itCost = [itCost, IterationCost{i}(1)];
+end
+figure()
+semilogy([1:size(itCost,2)],itCost, '-o')
+hold on
+semilogy([1,size(itCost,2)],[optCost(1), optCost(1)], '-o')
+%%
+start = Iterations+1;
 figure()
 hold on
-for i = 1:(Iterations+1)
+for i = start:(Iterations+1)
     a = plot(u_cl{i}, '-ob');
 end
 b = plot(u_opt, '-*k');

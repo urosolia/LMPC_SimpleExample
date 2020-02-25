@@ -1,6 +1,6 @@
 function [A, B, U, X, Q, R, N] = DefineSystem()
 % Set controller horizon
-N = 6;
+N = 3;
 
 % Set cost function
 Q = [1, 0;
