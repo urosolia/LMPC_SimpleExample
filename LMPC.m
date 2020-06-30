@@ -1,4 +1,4 @@
-function [ x_LMPC, u_LMPC, x_cl_out, u_cl_out, IterationCost_out] = LMPC(x0, x_cl, u_cl, IterationCost, A, B, Q, R, N, Iterations, X, U, LMPC_options)
+function [ x_LMPC, u_LMPC, x_cl_out, u_cl_out, IterationCost_out, SS] = LMPC(x0, x_cl, u_cl, IterationCost, A, B, Q, R, N, Iterations, X, U, LMPC_options, goalSet)
 %% Learning Model Predictive Control
 % This function runs the LMPC for a user-defined number of iterations.
 % The input to this functions are:
@@ -38,28 +38,45 @@ while (j <= Iterations)
     else
         tollerance = 10^(-6);
     end
-    while ( x_LMPC(:,t)'*x_LMPC(:,t) >(tollerance) )
+    exitFlag = 0;
+    while ( exitFlag == 0 )
         clc
-        disp(['Time step: ', num2str(t), ', Iteration: ', num2str(j), ' Best Cost: ',num2str(IterationCost_out{j}(1))])
+        fprintf('Time step: %d, Iteration: %d, Cost: %13.15f\n', [t, j, IterationCost_out{j}(1)]);
+
+%         disp(['Time step: ', num2str(t), ', Iteration: ', num2str(j), ' Best Cost: ',num2str(IterationCost_out{j}(1))])
         
         % Solve the LMPC at time t of the j-th iteration
-        [~, uPred ] = FTOCP(x_LMPC(:,t), N, Q, R, Qfun, SS,...
-                                                 A, B, X, U, LMPC_options);
-        
+        if LMPC_options.goalSet == 0
+            [~, uPred ] = FTOCP(x_LMPC(:,t), N, Q, R, Qfun, SS,...
+                                                     A, B, X, U, LMPC_options);
+        else
+            [~, uPred ] = FTOCP_goalSet( x_LMPC(:,t) , N, Q, R, Qfun, SS,...    
+                                                     A, B, X, U, LMPC_options, goalSet);
+        end
         % Update system position
-        u_LMPC(:,t) = double(uPred{1});
+        u_LMPC(:,t) = uPred;
         x_LMPC(:,t+1) = A*x_LMPC(:,t) + B*u_LMPC(:,t) ;
 
         t = t + 1;
+        
+        % Check exits conditions
+        if x_LMPC(:,t)'*x_LMPC(:,t) <(tollerance)
+            exitFlag = 1;
+        end
+        if LMPC_options.goalSet == 1
+            if goalSet.A*x_LMPC(:,t)<=goalSet.b
+                exitFlag = 1;
+            end
+        end
     end
     
     % Now save the data, update cost and safe set.
     x_cl_out{j+1} = x_LMPC;
     u_cl_out{j+1} = u_LMPC;
-    IterationCost_out{j+1} = ComputeCost(x_LMPC, u_LMPC, Q, R, LMPC_options);
+    IterationCost_out{j+1} = ComputeCost(x_LMPC, u_LMPC, Q, R, LMPC_options, goalSet, A, B);
     
     SS   = [SS, x_LMPC];
-    Qfun = [Qfun, ComputeCost(x_LMPC, u_LMPC, Q, R, LMPC_options)];
+    Qfun = [Qfun, IterationCost_out{j+1}];
 
     % increase Iteration index and restart
     j = j + 1;

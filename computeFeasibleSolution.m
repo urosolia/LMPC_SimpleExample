@@ -2,18 +2,31 @@ clc
 clear all
 close all
 
+LMPC_options.solver  = 'gurobi'; % Options are 'gurobi' or 'quadprog'. IMPORTANT: Use gurobi for better precision;
+LMPC_options.norm    = 2;        % Options 1-norm or 2-norm;
+LMPC_options.goalSet = 1;        % Options 1-norm or 2-norm;
+
 %%
 % Define your system 
 solver = 'quadprog'; % Options are 'gurobi' or 'quadprog';
 [A, B, U, X, Q, R, N] = DefineSystem();
 
+setUp = 2;
 %% Load the first feasible solution
 x_max = X.V(1,1);
-v_max = 0.1;
+if setUp == 1
+    v_max = 0.1;
+else
+    v_max = 2.0;
+end
 X_feasible = Polyhedron([x_max v_max; x_max -v_max; -x_max -v_max; -x_max v_max]);
 
-x0 = [-x_max;0];
-[ x_feasible, u_feasible ] = solve_CFTOCP( x0, 200, 100*Q, R, A, B, X_feasible, U, solver);
+if setUp == 1
+    x0 = [-15;0];
+else
+    x0 = [-14;2];
+end
+[ x_feasible, u_feasible ] = solve_CFTOCP( x0, 200, 100*Q, R, A, B, X_feasible, U, LMPC_options);
 
 % Plot the feasible solution
 figure
