@@ -1,6 +1,7 @@
 clc
 clear all
 close all
+addpath('utils','-end')
 
 %% Options
 LMPC_options.solver  = 'gurobi'; % Options are 'gurobi' or 'quadprog'. IMPORTANT: Use gurobi for better precision;
@@ -14,6 +15,7 @@ example = 2;
 
 % Set controller horizon
 N = 4;
+
 %%
 % Compute Goal Set
 if LMPC_options.goalSet == 1
@@ -24,7 +26,7 @@ else
     invariantGoalSet = [];
 end
 %% Load the first feasible solution
-load('feasibleSolution')
+load('data/feasibleSolution')
 if LMPC_options.goalSet == 1
     [K,~,~] = dlqr(A,B,Q,R);
     x_feasible = [x_feasible,    invariantGoalSet.V',x_feasible(:,end)];
@@ -126,5 +128,8 @@ else
     lambdaMult = []; % TO DO: need to compute gradient for distance objective
 end
 
-%%
-save(['LMPC_Example_',num2str(example),'_N_',num2str(N)])
+%% 
+save(['data/LMPC_Example_',num2str(example),'_N_',num2str(N)])
+
+%% 
+plotComparisonClosedLoop()

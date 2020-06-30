@@ -5,12 +5,12 @@ clc
 clear all
 close all
 
-load('LMPC_Example_2_N_4.mat')
+load('data/LMPC_Example_2_N_4.mat')
 x_LMPC_N_4 = x_LMPC;
 u_LMPC_N_4 = u_LMPC;
 
 
-load('LMPC_Example_2_N_3.mat')
+load('data/LMPC_Example_2_N_3.mat')
 x_LMPC_N_3 = x_LMPC;
 u_LMPC_N_3 = u_LMPC;
 
@@ -38,7 +38,7 @@ h = legend([a, b, c, d], 'LMPC input for $$N=3$$', 'LMPC input for $$N=4$$', 'Op
 set(h,'fontsize',15, 'interpreter', 'latex')
 xlabel('time step $$k$$', 'interpreter', 'latex','fontsize',20);
 ylabel('$$u_k$$', 'interpreter', 'latex','fontsize',20);
-xlim([0,20])
+xlim([0,16])
 ylim([-1.6,1.6])
 end
 
