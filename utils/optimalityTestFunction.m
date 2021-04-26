@@ -17,7 +17,8 @@ for i = 1:N
     Geq(:,(i-1)*(n+d)+[1:n])     = GeqNotOrdered(:, (i-1)*n+[1:n]);
     Geq(:,(i-1)*(n+d)+n+[1:d])   = GeqNotOrdered(:, n*N+(i-1)*d+[1:d]);
 end
-constrMat   = blkdiag(kron(eye(N),blkdiag(X.A,U.A)));
+
+constrMat   = blkdiag(kron(eye(N),blkdiag(round(X.A,10),U.A)));
 constrVec   = [kron(ones(N,1),[X.b;U.b])];
 
 % Initialize Vector used to compute the gradient

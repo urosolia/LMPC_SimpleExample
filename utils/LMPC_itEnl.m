@@ -1,4 +1,4 @@
-function [ x_LMPC, u_LMPC, x_cl_out, u_cl_out, IterationCost_out, SS] = LMPC(x0, x_cl, u_cl, IterationCost, A, B, Q, R, N, Iterations, X, U, LMPC_options, goalSet)
+function [ x_LMPC, u_LMPC, x_cl_out, u_cl_out, IterationCost_out, SS] = LMPC_itEnl(x0, x_cl, u_cl, IterationCost, A, B, Q, R, N, Iterations, X, U, LMPC_options, goalSet)
 %% Learning Model Predictive Control
 % This function runs the LMPC for a user-defined number of iterations.
 % The input to this functions are:
@@ -30,6 +30,10 @@ while (j <= Iterations)
     Qfun = SSQfun.V(:, end)';
     
     t = 1;        % Initialize time
+    direction = [(-1)^j; 0.1];
+    direction = [1; -0.1];
+    x0 = FTOCP_computeInitialCondition(direction, N, Qfun, SS, A, B, X, U, LMPC_options);
+    list_x0 = [list_x0, x0]
     x_LMPC = x0;  % Initial condition
 
     % This is the time loop for the j-th iteration. This loop terminates when the

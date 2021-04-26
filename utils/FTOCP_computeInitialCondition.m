@@ -1,4 +1,4 @@
-function [ x, uPred ] = FTOCP( x_t , N, Q, R, Qfun, SS, A, B, X, U, LMPC_options)
+function [ xOut ] = FTOCP_computeInitialCondition( direction, N, Qfun, SS, A, B, X, U, LMPC_options)
 % FTOCP solves the Finite Time Optimal Control Problem
 % The function takes as inputs
 % - x_t: state of the system at time t
@@ -12,6 +12,7 @@ function [ x, uPred ] = FTOCP( x_t , N, Q, R, Qfun, SS, A, B, X, U, LMPC_options
 % - Solver: solver to use for the FTOCP
 
 % Define Yalmip Variables
+x0 = sdpvar(2,1);
 x=sdpvar(size(A,2)*ones(1,N+1),ones(1,N+1));
 u=sdpvar(size(B,2)*ones(1,N),ones(1,N));
 lambda = sdpvar(length(Qfun), 1); % Number of multipliers used for the convex hull
@@ -23,7 +24,8 @@ Hu  = U.A;  bu  = U.b;
 % ======= Constraints Definition ======
 
 % Initial Condition
-Constraints = [x_t == x{1}];
+Constraints = [direction(2)*x0(1) - direction(1)*x0(2) == 0;
+                x0 == x{1}];
 
 % System Dynamics
 for i = 1:N
@@ -42,25 +44,17 @@ Constraints=[Constraints;
 
 % ======= Cost Definition ======
 % Running Cost
-Cost=0;
-for i=1:N
-    if LMPC_options.norm == 1
-        Cost = Cost + norm(Q*x{i},1) + norm(R*u{i},1);
-    else
-        Cost = Cost + x{i}'*Q*x{i} + u{i}'*R*u{i};
-    end
-end 
-
-% Terminal cost as convex combination of stored cost-to-go
-Cost = Cost + Qfun*lambda;
+Cost= direction'*x0;
 
 % Solve the FTOCP
-options = sdpsettings('verbose',1,'solver',LMPC_options.solver);
+options = sdpsettings('verbose',0,'solver',LMPC_options.solver);
 % options.OptimalityTolerance = 1e-15;
 % options.StepTolerance = 1e-15;
 Problem = optimize(Constraints,Cost,options);
 Objective = double(Cost);
 uPred = double(u{1});
+
+xOut = double(x0);
 
 end
 

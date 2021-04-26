@@ -132,4 +132,4 @@ end
 save(['data/LMPC_Example_',num2str(example),'_N_',num2str(N)])
 
 %% 
-plotComparisonClosedLoop()
+plotComparisonClosedLoop(2)
